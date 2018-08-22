@@ -1,6 +1,6 @@
 import psycopg2
-from Data_Loaders_Bittrex.db_utils2 import *
-from Data_Loaders_Bittrex.data_loaders import *
+from db_utils2 import *
+from data_loaders import *
 import time
 
 

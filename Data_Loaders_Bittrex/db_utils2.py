@@ -1,6 +1,6 @@
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
-from Data_Loaders_Bittrex.db_config import *
+from db_config import *
 
 
 def connect_db(dbname=database_credentials['dbname'], dbuser=database_credentials['user'],

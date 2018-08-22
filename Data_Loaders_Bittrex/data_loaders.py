@@ -20,7 +20,7 @@ class DataLoader:
         :param url: URL of the API
         :return: Success (if the query was successful)(Boolean), Result dictionary
         """
-        r = json.loads(requests.get(url).content)
+        r = json.loads(requests.get(url).content.decode('utf-8'))
         if r['success']:
             return r['success'], r['result']
         return r['success'], r['message']
