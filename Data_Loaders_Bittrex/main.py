@@ -1,6 +1,8 @@
 import psycopg2
 from Data_Loaders_Bittrex.db_utils2 import *
 from Data_Loaders_Bittrex.data_loaders import *
+import time
+
 
 def check_connection():
     try:
@@ -16,18 +18,31 @@ def main():
     DL = DataLoader()
     data = DL.get_all_ticks_data()
     write_data_to_db(data, time_frame=1)
-    db_connection = connect_db()
-    db_cursor = get_cursor(db_connection)
-    db_cursor.execute("select * from min1_data")
-    all_data = pd.DataFrame(db_cursor.fetchall(), columns=min_data_columns).set_index('Timestamp')
-    min5_data = DL.resample_data(all_data, 5)
-    min15_data = DL.resample_data(all_data, 15)
-    min30_data = DL.resample_data(all_data, 30)
-    min60_data = DL.resample_data(all_data, 60)
-    write_data_to_db(min5_data, time_frame=5)
-    write_data_to_db(min15_data, time_frame=15)
-    write_data_to_db(min30_data, time_frame=30)
-    write_data_to_db(min60_data, time_frame=60)
+    return data
 
-check_connection()
-main()
+
+t0 = time.time()
+whole_data = None
+
+while True:
+    DL = DataLoader()
+    try:
+        check_connection()
+        if whole_data is None:
+            whole_data = main()
+        else:
+            whole_data.append(main())
+
+        for timeperiod in [5, 15, 30, 60]:
+            if (time.time() - t0) == 60*timeperiod:
+                min_data = DL.resample_data(whole_data, timeperiod)
+                write_data_to_db(min_data, time_frame=timeperiod)
+
+            if timeperiod == 60:
+                t0 = time.time()
+                whole_data = None
+
+
+    except Exception as e:
+        print(e)
+        continue
